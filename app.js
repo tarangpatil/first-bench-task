@@ -14,7 +14,6 @@ app.get("/user/all", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   // extract data from body
-  await User.deleteOne({ email: "tarangpatil@gmail.com" });
   const { name, password, email, phoneNumber } = req.body;
 
   // check if user with same email or phoneNumber exists
@@ -32,23 +31,44 @@ app.post("/register", async (req, res) => {
   res.status(201).json({ ...newUser._doc, password: undefined });
 });
 
+app.get("/user/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id).select("-password");
+  if (!user)
+    return res.status(404).json({ message: `user not found with id ${id}` });
+  return res.json(user);
+});
+
 app.put("/user/:id", async (req, res) => {
   // get id from params and find corresponding user
   const { id } = req.params;
   const user = await User.findById(id);
 
   // return 404 if not found
-  if (!user) return res.status(404).send(`user not found with id ${id}`);
+  if (!user)
+    return res.status(404).json({ message: `user not found with id ${id}` });
 
   // update corresponding values
   user.email = req.body.email || user.email;
   user.name = req.body.name || user.name;
   user.phoneNumber = req.body.phoneNumber || user.phoneNumber;
-
   if (req.body.password)
     user.password = await bcrypt.hash(req.body.password, 10);
 
-  return res.status(200).json(await user.save());
+  await user.save();
+  user.password = undefined;
+  return res.status(200).json(user);
+});
+
+app.delete("/user/:id", async (req, res) => {
+  const { id } = req.params;
+  const user = await User.findById(id);
+  if (!user)
+    return res.status(404).json({ message: `user not found with id ${id}` });
+
+  const result = await user.deleteOne();
+  console.log({ result });
+  res.status(204).send();
 });
 
 module.exports = app;
