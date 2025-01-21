@@ -26,6 +26,12 @@ const userSchema = new mongoose.Schema({
     default: "user",
     required: true,
   },
+  status: {
+    type: String,
+    enum: ["active", "deactivated"],
+    default: "active",
+    required: true,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

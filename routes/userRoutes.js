@@ -4,6 +4,7 @@ const { verifyAdmin, verifySameUser } = require("../middleware/authorization");
 const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwt");
+const { validateEmail, validatePassword } = require("../utils/validators");
 const router = express.Router();
 
 router.get(
@@ -18,6 +19,14 @@ router.get(
 router.post("/register", async (req, res) => {
   // extract data from body
   const { name, password, email, phoneNumber } = req.body;
+
+  if (!validateEmail(email))
+    return res.status(400).json({ message: `invalid email ${email}` });
+
+  if (!validatePassword(password))
+    return res
+      .status(400)
+      .json({ message: `password does not match criteria` });
 
   // check if user with same email or phoneNumber exists
   if (await User.exists({ $or: [{ email }, { phoneNumber }] }))
@@ -93,9 +102,11 @@ router.delete(
     const user = await User.findById(id);
     if (!user)
       return res.status(404).json({ message: `user not found with id ${id}` });
-
-    await user.deleteOne();
-    res.status(204).send();
+    if (user.status === "deactivated")
+      return res.status(400).json({ message: `account is deactivated` });
+    user.status = "deactivated";
+    await user.save();
+    return res.status(204).send();
   }
 );
 
