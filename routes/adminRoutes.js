@@ -65,6 +65,12 @@ router.delete(
     if (!user)
       return res.status(404).json({ message: `user not found with id ${id}` });
 
+    const count = await User.countDocuments({ role: "admin" });
+    if (count === 1)
+      return res
+        .status(400)
+        .json({ message: "this is the last admin account" });
+
     await user.deleteOne();
 
     return res.status(204).json();
