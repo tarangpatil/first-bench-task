@@ -1,25 +1,17 @@
 const express = require("express");
 const passport = require("../config/passport");
-const { verifyAdmin, verifySameUser } = require("../middleware/authorization");
+const { verifySameUser } = require("../middleware/authorization");
 const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwt");
 const { validateEmail, validatePassword } = require("../utils/validators");
 const router = express.Router();
 
-router.get(
-  "/user/all",
-  passport.authenticate("jwt", { session: false }),
-  // verifyAdmin,
-  async (_req, res) => {
-    res.json(await User.find());
-  }
-);
-
 router.post("/register", async (req, res) => {
   // extract data from body
   const { name, password, email, phoneNumber } = req.body;
 
+  // validate email and password
   if (!validateEmail(email))
     return res.status(400).json({ message: `invalid email ${email}` });
 
