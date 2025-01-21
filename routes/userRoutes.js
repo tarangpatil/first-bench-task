@@ -5,6 +5,7 @@ const { User } = require("../models");
 const bcrypt = require("bcrypt");
 const { generateToken } = require("../utils/jwt");
 const { validateEmail, validatePassword } = require("../utils/validators");
+const { verifyUserActiveStatus } = require("../middleware/user");
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
@@ -43,6 +44,7 @@ router.get(
   "/user/:id",
   passport.authenticate("jwt", { session: false }),
   verifySameUser,
+  verifyUserActiveStatus,
   async (req, res) => {
     // get id
     const { id } = req.params;
@@ -63,6 +65,7 @@ router.put(
   "/user/:id",
   passport.authenticate("jwt", { session: false }),
   verifySameUser,
+  verifyUserActiveStatus,
   async (req, res) => {
     // get id from params and find corresponding user
     const { id } = req.params;
@@ -89,13 +92,12 @@ router.delete(
   "/user/:id",
   passport.authenticate("jwt", { session: false }),
   verifySameUser,
+  verifyUserActiveStatus,
   async (req, res) => {
     const { id } = req.params;
     const user = await User.findById(id);
     if (!user)
       return res.status(404).json({ message: `user not found with id ${id}` });
-    if (user.status === "deactivated")
-      return res.status(400).json({ message: `account is deactivated` });
     user.status = "deactivated";
     await user.save();
     return res.status(204).send();
@@ -110,6 +112,10 @@ router.post("/login", async (req, res) => {
     return res
       .status(400)
       .json({ message: `user not found with email ${email}` });
+
+  if (user.status === "deactivated")
+    return res.status(400).json({ message: `account is deactivated` });
+
   const passwordMatches = await bcrypt.compare(password, user.password);
 
   if (!passwordMatches)
