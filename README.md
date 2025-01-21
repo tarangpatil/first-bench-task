@@ -1,51 +1,27 @@
-# first-bench-task
+# FirstBench Task
 
-FirstBench.ai internship task
+**FirstBench.ai Internship Task**
 
-## Following is the assignment
+**Postman Collection Link**: [Postman Collection](https://www.postman.com/tarangpatil21/workspace/first-bench-task/collection/36976000-152da616-f133-4ee3-974a-479e4183e3ab?action=share&creator=36976000)
 
-Assignment for Backend Developer Internship
+---
 
-**Objective:**
+## Answers to the Questions from the Google Form
 
-Evaluate your understanding of backend development principles, problem-solving skills, so just blindly copying from AI Tools wont help.
+### **Q1. Does it mean we delete the account from the database or we can keep the user data but not allow them to log in? Think of the best possible solution.**
 
-Problem Statement:
+**Answer**:  
+Whether to keep user data when an account is deactivated depends on the use case of the application and the organization. In this codebase, the user data is kept intact, and a `status` flag is added to indicate whether the account is active or inactive. This setup also allows reactivation of accounts in case the user decides to do so.
 
-Create a RESTFul API for User Management System using Node.js, Express.js Framework, MongoDb.
+---
 
-**Features:**
+### **Q2. How do you manage a super admin and its login feature? Do we need to create a separate database table to save their details? Also, what is the best way to create a Super Admin account? Should the Super Admin also register with an email and password like a normal user?**
 
-A user should be able to create an account using name, email, password, phone number.
+**Answer**:  
+There are various ways of managing admins and super admins. Logging in as an admin, in most cases, may not differ from logging in as a normal user.  
 
-Registered user should be able to login using email and password.
+Creating a separate table to store admins depends on the application use case (e.g., whether we would like to have both admin and normal accounts with the same email and phone number in order to separate their personal and professional accounts).  
 
-User should be able to see their corresponding details (name, email, phone number) and should be able to update them.
+This implementation uses a single table, `Users`, which contains both admin and normal user accounts. As a result, a person cannot be both a user and an admin at the same time.  
 
-User should also have the ability to deactivate their account.
-
-Key Decision: Does it mean we delete the account from the database or we can keep the user data but not allow them to login, Think of the best possible solution.
-
-There should be a Super Admin who has the ability to get the details of all the users upon logging in.
-
-Key Decision:How do you manage a super admin and its login feature? Do we need to create a separate Database table to save their details? Also what is the best way to create a Super Admin account, should Super Admin also register with email and password like normal user?
-
-**Things to keep in mind:**
-
-Add constraints say, for example check if the email format entered is correct or not, password is at least 8 characters. Make sure to add constraints in Schema design as well, wherever necessary.
-
-Show graceful message wherever required, for example on invalid login.
-
-Handle edge cases like already registered user cannot register again (Basically no 2 or more user entries should be with the same email)
-
-Include a README file with basic feature and instructions for project setup.
-
-Create a Postman collection for testing the APIs.
-
-**Submission:**
-
-Upload the code on any version control platform(GitHub, GitLab etc) and share the link of the public repository link. (Make sure to have proper commit messages)
-
-Share the Postman collection link with all APIs added.
-
-- Design
+The best way to create a super admin would be to manually create entries through database administration, as anything else would pose security concerns. This codebase has implemented an alternative: Only admins can create and delete other admin accounts, and there must always be at least one admin account (you cannot delete the last admin account). Initially, one admin account must be created using a manual MongoDB query.
